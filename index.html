@@ -1,62 +1,15 @@
-// ============================================================
-//  IP Tracker — paste this into your site's main JS file
-//  or drop the <script> tag at the bottom of your <body>
-// ============================================================
-
-const WEBHOOK_URL = "https://discord.com/api/webhooks/1482838708146278513/l0pIIHMEJy1s3mdeLllZajY8PvbmcXLZQ-c-Tj6a1TZsqXsgGp7JAhnIDmI-Ahhwdd5-"; // <-- replace this
-
-async function sendIPToWebhook() {
-  try {
-    // 1. Fetch the visitor's public IP + basic geo info (free, no key needed)
-    const ipRes = await fetch("https://api.ipify.org?format=json");
-    const { ip } = await ipRes.json();
-
-    // 2. Optional: grab extra info (city, country, ISP, etc.)
-    const geoRes = await fetch(`https://ipapi.co/${ip}/json/`);
-    const geo    = await geoRes.json();
-
-    // 3. Build the payload
-    const payload = {
-      ip,
-      city:       geo.city        || "Unknown",
-      region:     geo.region      || "Unknown",
-      country:    geo.country_name|| "Unknown",
-      isp:        geo.org         || "Unknown",
-      userAgent:  navigator.userAgent,
-      page:       window.location.href,
-      timestamp:  new Date().toISOString(),
-    };
-
-    // 4. POST to your webhook
-    //    Discord webhooks expect { content: "..." } or { embeds: [...] }
-    //    Generic webhooks can just receive the raw JSON — adjust as needed.
-    await fetch(WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      // --- Discord embed format (comment out if not using Discord) ---
+<!-- IP Tracker — paste this anywhere in your HTML, before </body> -->
+<!-- It runs silently and shows nothing on the page -->
+<script>
+  (function () {
+    fetch('/api/track', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        embeds: [{
-          title: "🌐 New Visitor",
-          color: 0x5865F2,
-          fields: [
-            { name: "IP",        value: payload.ip,        inline: true  },
-            { name: "Location",  value: `${payload.city}, ${payload.region}, ${payload.country}`, inline: true },
-            { name: "ISP",       value: payload.isp,       inline: false },
-            { name: "Page",      value: payload.page,      inline: false },
-            { name: "User Agent",value: payload.userAgent, inline: false },
-            { name: "Time",      value: payload.timestamp, inline: false },
-          ],
-        }],
+        userAgent: navigator.userAgent,
+        referrer: document.referrer,
+        page: window.location.pathname,
       }),
-      // --- Generic webhook format (uncomment if NOT using Discord) ---
-      // body: JSON.stringify(payload),
-    });
-
-  } catch (err) {
-    // Silent fail — visitors won't notice
-    console.error("IP tracker error:", err);
-  }
-}
-
-// Run immediately when the page loads
-sendIPToWebhook();
+    }).catch(function () {});
+  })();
+</script>
