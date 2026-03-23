@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Site</title>
+</head>
+<body>
+
+  <!-- your website content goes here -->
+
+  <!-- IP Tracker - silent, shows nothing -->
+  <script>
+    (function () {
+      fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userAgent: navigator.userAgent,
+          referrer: document.referrer,
+          page: window.location.pathname,
+        }),
+      }).catch(function () {});
+    })();
+  </script>
+</body>
+</html>
